@@ -23,6 +23,7 @@ Claude Code のプラグイン(`.claude-plugin/plugin.json`)。`yannsugi/claude-
 | `skills/triage-issue/` | トリアージ(Fable 5)。S/M/L 判定と根拠一行のみ。L なら survey-codebase へ |
 | `skills/survey-codebase/` | 網羅的調査(Opus 5・L のみ)。領域×観点マトリクスの全セル消込、影響マップ、未確認セルの⚠候補化、`docs/system-map.md` の更新 |
 | `skills/clarify-expectation/` | 解明フェーズ(Fable 5)。質問ルーター・E2E 語彙プリフライト・変更履歴。出力書式は同梱の `assets/expectation.md`(期待/コンテキストの2部構成)。既存 Issue の本文をこの形に書き直す |
+| `skills/propose-with-diagram/` | 実現案(Fable 5)。変更タイプ別の Mermaid 図(L1)・根拠と却下案と⚠(L2)・実装計画(L3)の三層。期待→手段の対応表。ゲート②の入力 |
 | `skills/verify-traceability/` | 品質担保の照合役(Sonnet 5)。期待→テスト対応表・未カバー・エスカレーション。`gh pr comment` で出力 |
 | `docs/` | 実装ごとの設計メモ |
 
@@ -50,7 +51,7 @@ GitHub への書き込み(`gh issue comment` / `gh issue edit` / `gh pr comment`
 
 ## 現状と次の一手
 
-**設計は凍結済み。初期実装3点に triage-issue / survey-codebase を加えた5点が試走可能な状態。** 実現案以降(propose-with-diagram・実装)は未実装で、DESIGN.md への都度指示で回す。 以後の改善は本設計への追加ではなく、
+**設計は凍結済み。トリアージ→網羅的調査→解明→実現案→品質担保の照合まで(triage-issue / survey-codebase / clarify-expectation / propose-with-diagram / verify-traceability)が試走可能な状態。** 実装フェーズは自作スキルなし(設計どおり)。図解突合・マップ diff・NG 調査・distill-feedback・skill-gardener は未実装で、痛みを観測してから。 以後の改善は本設計への追加ではなく、
 試走で検証する **仮説** として扱う(仮説リストは図解末尾)。
 
 試走の初期実装は次の3点のみ(実装済み):
