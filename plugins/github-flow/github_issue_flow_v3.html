@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Issue解決フロー v3（凍結版・北極星）</title>
+<style>
+  :root{
+    --paper:#F7F8F6;
+    --ink:#22303C;
+    --ink-soft:#5A6B7A;
+    --line:#C9D2D8;
+    --ai:#3D6B8E;
+    --ai-bg:#EBF1F6;
+    --human:#B4690E;
+    --human-bg:#FBF1E2;
+    --asset:#4A7A5A;
+    --asset-bg:#EBF3ED;
+    --ng:#A2453C;
+    --ng-bg:#F8ECEA;
+    --gen:#6B5B8E;
+    --gen-bg:#F0EDF6;
+    --ctx:#7A6A4F;
+    --ctx-bg:#F6F2E9;
+    --merge:#2E6B4F;
+    --fable:#6B5B8E;
+    --opus:#3D6B8E;
+    --sonnet:#4A7A5A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
+    line-height:1.55;padding:32px 20px 56px;}
+  .wrap{max-width:1120px;margin:0 auto;}
+
+  header{margin-bottom:20px;border-bottom:2px solid var(--ink);padding-bottom:16px;}
+  h1{font-size:1.45rem;font-weight:700;}
+  .frozen{display:inline-block;font-size:.7rem;font-weight:700;color:#fff;background:var(--ink);border-radius:4px;padding:2px 10px;margin-left:10px;vertical-align:middle;letter-spacing:.05em;}
+  .sub{color:var(--ink-soft);font-size:.9rem;margin-top:6px;}
+
+  /* 原則バンド */
+  .creed{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0 24px;}
+  .creed .box{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 16px;font-size:.83rem;}
+  .creed h3{font-size:.85rem;font-weight:700;margin-bottom:7px;color:var(--ink);}
+  .creed ul{list-style:none;}
+  .creed li{padding:2px 0 2px 16px;position:relative;}
+  .creed li::before{content:"";position:absolute;left:2px;top:.7em;width:8px;height:2px;background:var(--ink-soft);}
+
+  .legend{display:flex;gap:15px;flex-wrap:wrap;margin:0 0 22px;font-size:.8rem;}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  .grid{display:grid;grid-template-columns:1fr 348px;gap:26px;align-items:start;}
+
+  /* ---------- 定常フロー ---------- */
+  .pipeline{position:relative;padding-left:26px;}
+  .pipeline::before{content:"";position:absolute;left:8px;top:14px;bottom:14px;width:2px;background:var(--line);}
+  .phase{position:relative;margin-bottom:18px;}
+  .phase::before{content:"";position:absolute;left:-24px;top:14px;width:12px;height:12px;border-radius:50%;
+    background:var(--ai);border:2.5px solid var(--paper);box-shadow:0 0 0 2px var(--ai);}
+  .phase.merge::before{background:var(--merge);box-shadow:0 0 0 2px var(--merge);}
+  .phase.branch::before{background:#fff;box-shadow:0 0 0 2px var(--ink-soft);}
+  .card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ai);border-radius:6px;padding:13px 16px;}
+  .phase.merge .card{border-left-color:var(--merge);}
+  .phase.branch .card{border-left-color:var(--ink-soft);}
+  .phase-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .phase-name small{font-weight:400;color:var(--ink-soft);font-size:.78rem;}
+  .unit-tag{font-size:.68rem;font-weight:600;color:var(--ai);border:1px solid var(--ai);border-radius:10px;padding:1px 8px;}
+  ul.steps{list-style:none;margin-top:8px;font-size:.85rem;}
+  ul.steps li{padding:3px 0 3px 18px;position:relative;}
+  ul.steps li::before{content:"";position:absolute;left:4px;top:.72em;width:7px;height:2px;background:var(--ai);}
+  ul.steps li.loop::before{content:"⇄";background:none;top:.1em;left:0;color:var(--ai);font-size:.8rem;}
+  ul.steps li.split::before{content:"⑂";background:none;top:.05em;left:1px;color:var(--ai);font-size:.85rem;}
+  ul.steps li.warn::before{content:"⚠";background:none;top:.05em;left:0;color:var(--human);font-size:.78rem;}
+  .note{font-size:.78rem;color:var(--ink-soft);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;}
+
+  .gate{display:flex;align-items:flex-start;gap:10px;background:var(--human-bg);border:1px solid #E5C79A;border-radius:6px;padding:10px 14px;margin-top:10px;}
+  .gate .g-mark{flex:none;background:var(--human);color:#fff;border-radius:4px;font-size:.72rem;font-weight:700;padding:2px 8px;margin-top:2px;letter-spacing:.03em;}
+  .gate .g-body{font-size:.84rem;}
+  .gate .g-body b{color:var(--human);}
+  .gate .g-relax{display:block;font-size:.75rem;color:var(--ink-soft);margin-top:3px;}
+
+  .dispatch{background:var(--ai-bg);border:1px dashed var(--ai);border-radius:6px;padding:8px 12px;margin-top:9px;font-size:.78rem;}
+  .dispatch b{color:var(--ai);}
+
+  .fallback{background:var(--ng-bg);border:1px dashed var(--ng);border-radius:6px;padding:9px 12px;margin-top:9px;font-size:.79rem;}
+  .fallback b{color:var(--ng);display:block;margin-bottom:3px;}
+  .fallback ul{list-style:none;}
+  .fallback li{padding:1px 0 1px 14px;position:relative;}
+  .fallback li::before{content:"↩";position:absolute;left:0;top:0;color:var(--ng);font-size:.75rem;}
+
+  .mode{display:flex;gap:8px;margin-top:9px;font-size:.76rem;}
+  .mode span{border-radius:5px;padding:6px 9px;flex:1;}
+  .mode .m1{background:#FBF1E2;border:1px solid #E5C79A;}
+  .mode .m2{background:#EBF3ED;border:1px solid #BDD5C4;}
+  .mode b{display:block;font-size:.76rem;margin-bottom:2px;}
+
+  .spec{background:#FAFBFC;border:1px solid var(--line);border-radius:6px;padding:9px 12px;margin-top:9px;font-size:.78rem;}
+  .spec b{display:block;margin-bottom:3px;}
+  .spec ol{margin-left:18px;}
+  .spec li{padding:1px 0;}
+
+  /* ---------- 右カラム ---------- */
+  .side{display:flex;flex-direction:column;gap:18px;}
+  .panel{border-radius:8px;padding:14px 16px;border:1px solid var(--line);background:#fff;}
+  .panel.ng{border-color:#E0BDB8;background:var(--ng-bg);}
+  .panel.asset{border-color:#BDD5C4;background:var(--asset-bg);}
+  .panel.gen{border-color:#CBC2DE;background:var(--gen-bg);}
+  .panel.ctx{border-color:#D8CDB8;background:var(--ctx-bg);}
+  .panel h2{font-size:.93rem;font-weight:700;margin-bottom:8px;}
+  .panel.ng h2{color:var(--ng);}
+  .panel.asset h2{color:var(--asset);}
+  .panel.gen h2{color:var(--gen);}
+  .panel.ctx h2{color:var(--ctx);}
+  .panel p{font-size:.8rem;margin-bottom:8px;}
+  .route{background:#fff;border:1px solid var(--line);border-radius:5px;padding:7px 10px;font-size:.78rem;margin-bottom:6px;}
+  .route b{display:block;}
+  .route .to{color:var(--ink-soft);font-size:.74rem;}
+  .panel.ng .route{border-left:3px solid var(--ng);}
+  .panel.asset .route{border-left:3px solid var(--asset);}
+  .panel.gen .route{border-left:3px solid var(--gen);}
+  .panel.ctx .route{border-left:3px solid var(--ctx);}
+  .flowback{font-size:.74rem;color:var(--ink-soft);margin-top:3px;}
+
+  .cycle{margin-top:22px;border:1px dashed var(--asset);border-radius:8px;padding:13px 17px;background:var(--asset-bg);font-size:.83rem;}
+  .cycle b{color:var(--asset);}
+
+  /* ---------- 表 ---------- */
+  .skilltable{margin-top:26px;}
+  .skilltable h2{font-size:1.05rem;font-weight:700;margin-bottom:4px;}
+  .skilltable .principle{font-size:.82rem;color:var(--ink-soft);margin-bottom:10px;}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);font-size:.81rem;}
+  th{background:var(--ink);color:#fff;text-align:left;padding:8px 12px;font-weight:600;font-size:.77rem;}
+  td{padding:8px 12px;border-top:1px solid var(--line);vertical-align:top;}
+  td.sk{font-weight:700;white-space:nowrap;}
+  .chip{display:inline-block;border-radius:4px;padding:1px 9px;font-size:.73rem;font-weight:700;color:#fff;white-space:nowrap;}
+  .chip.fable{background:var(--fable);}
+  .chip.opus{background:var(--opus);}
+  .chip.sonnet{background:var(--sonnet);}
+  td .why{color:var(--ink-soft);font-size:.77rem;}
+  tr.first td{background:#F3F7F4;}
+  .first-tag{display:inline-block;font-size:.66rem;font-weight:700;color:#fff;background:var(--merge);border-radius:3px;padding:1px 6px;margin-left:6px;vertical-align:middle;}
+
+  /* ---------- 初期実装/仮説 ---------- */
+  .rollout{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .rollout .box{border-radius:8px;padding:13px 16px;font-size:.82rem;border:1px solid var(--line);background:#fff;}
+  .rollout .box.now{border-color:#BDD5C4;background:var(--asset-bg);}
+  .rollout h3{font-size:.88rem;font-weight:700;margin-bottom:7px;}
+  .rollout .box.now h3{color:var(--merge);}
+  .rollout ul{list-style:none;}
+  .rollout li{padding:2px 0 2px 16px;position:relative;}
+  .rollout li::before{content:"";position:absolute;left:2px;top:.7em;width:8px;height:2px;background:var(--ink-soft);}
+
+  @media (max-width:880px){
+    .grid,.creed,.rollout{grid-template-columns:1fr;}
+    body{padding:24px 14px 40px;}
+    table{font-size:.75rem;}
+    td.sk{white-space:normal;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>GitHub Issue解決フロー v3<span class="frozen">凍結版・北極星</span></h1>
+  <div class="sub">方針：開発者の労力を最小に（将来の労力を含む通時的最小化）、最大の品質を。承認は労力ではなく理解を生産する投資。GitHub＝具体、Slack＝抽象。以後の改善は本設計への追加ではなく、試走で検証する仮説として扱う。</div>
+</header>
+
+<div class="creed">
+  <div class="box">
+    <h3>人間が理解するのはこの3点だけ</h3>
+    <ul>
+      <li><b>期待の正しさ</b>（ゲート①）— 問題を正しく捉えたか</li>
+      <li><b>判断の方向</b>（ゲート②）— 進み方は妥当か（承認＝仮説の採択。実装は反証実験）</li>
+      <li><b>翻訳の一致</b>（ゲート③）— 期待がテストに正しく落ちたか</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>実装は人間が読まない。代わりに観測と指標が担保する</h3>
+    <ul>
+      <li><b>実装の正しさ</b> → E2Eの観測（AIの誠実さと無関係に真）</li>
+      <li><b>実装の健全性</b> → 前提崩壊率（内部の腐敗の遅行指標）</li>
+      <li>性善説は「承認の判断」にのみ適用。信用が必要な面積を最小化して残りに適用する</li>
+    </ul>
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--ai)"></span>AIが実行</span>
+  <span><span class="dot" style="background:var(--human)"></span>人間ゲート</span>
+  <span><span class="dot" style="background:var(--ng)"></span>例外・差し戻し</span>
+  <span><span class="dot" style="background:var(--asset)"></span>資産・メタループ</span>
+  <span><span class="dot" style="background:var(--gen)"></span>世代交代</span>
+  <span><span class="dot" style="background:var(--ctx)"></span>コンテキスト規律</span>
+</div>
+
+<div class="grid">
+
+  <!-- ============ 定常フロー ============ -->
+  <div class="pipeline">
+
+    <div class="phase branch">
+      <div class="card">
+        <div class="phase-name">トリアージ<small>S / M / L 判定＋根拠を一行記録（ゲート①で人間の目に入る）</small></div>
+        <ul class="steps">
+          <li><b>S</b>：軽量経路（解明と実現案を1コメントに畳む。承認は省かない — 理解コストが小さいから速いだけ）</li>
+          <li><b>M</b>:標準経路（下記フルフロー）</li>
+          <li><b>L</b>:網羅的調査を前置してからフルフロー</li>
+        </ul>
+        <div class="note">誤判定はNG調査の帰属先の一つ（L相当をMと誤ると調査不足のまま分割し多単位で崩壊する）</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="card">
+        <div class="phase-name">網羅的調査<small>Lのみ・最大分割の前提条件</small></div>
+        <ul class="steps">
+          <li>領域×観点マトリクス（FE/BE/IaC/データ × 参照/変更/暗黙の依存）の全セルを「確認済み/未確認」で埋める — 網羅の定義を先に固定し自己申告を検証可能にする</li>
+          <li>システムマップを起点に差分確認（全量探索は初回のみ。以降は地図の更新）。並列サブエージェントで領域ごとに探索し集約</li>
+          <li class="warn">未確認セルは⚠として期待側に浮上し、ゲート①で人間の目に入る</li>
+        </ul>
+        <div class="note">産物：影響マップ（確信度つき）→ システムマップへ還元（探索系更新）</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="card">
+        <div class="phase-name">解明フェーズ<small>曖昧さの解消＋問題の最大分割</small></div>
+        <ul class="steps">
+          <li class="loop">期待の詳細化 ⇄ 現状調査（改修/新規、FE・BE・IaC領域判定）</li>
+          <li>質問ルーター：ビジネス判断→人間／技術判断→調査で自己解決／些末→デフォルト案＋通知</li>
+          <li class="split"><b>最大分割</b>：独立に検証可能な最小の期待単位へ。依存グラフ作成。単位を跨ぐ期待は「統合期待」として親Issueに残す</li>
+          <li>期待の変更履歴：どの調査結果を受けて、どの行が、なぜ変わったか（実装からの還流も受ける）</li>
+        </ul>
+        <div class="note">産物：単位ごとの期待文書（Asis/Tobe・影響画面・制約。実装語彙を含まない）＋変更履歴＋依存グラフ＋背景コンテキスト</div>
+        <div class="gate">
+          <span class="g-mark">ゲート①</span>
+          <span class="g-body"><b>期待＋変更履歴＋分割の承認</b> — 提示は差分中心：L1＝単位一覧と依存図＋初版から変わった行のハイライト、L2＝変更理由と分割根拠。人間は「なぜこの形に変わったか」の妥当性だけ判断</span>
+        </div>
+        <div class="dispatch"><b>分配ポイントA（垂直・原則）</b>：承認済みの期待単位ごとに担当（人間/エージェント）へ配り、以降のパイプラインを丸ごと持たせる。契約が凍結された地点でのみ安全に並列化できる — 解明フェーズ自体は分配不能（曖昧なまま配ると解釈が人数分に複製される）</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="card">
+        <div class="phase-name">実現案 <span class="unit-tag">単位ごと</span></div>
+        <ul class="steps">
+          <li>実現案の作成（背景コンテキスト＋依存グラフ＋マップを判断材料に）</li>
+        </ul>
+        <div class="spec">
+          <b>提示仕様（違和感の検出器として設計する）</b>
+          <ol>
+            <li>期待の語彙で書く — 振る舞いの因果が主表現。実装語彙はL3へ</li>
+            <li>三層：L1＝図1枚（ここだけでNG判断が成立）／L2＝判断根拠と<b>却下案＋却下理由</b>／L3＝実装計画（人間は原則見ない）</li>
+            <li>⚠の名指し（予算：最大3）— リスク・低確信・解釈が入った箇所をAI自身が宣言</li>
+            <li>図形式は変更タイプ別に固定（画面→Before/After状態遷移、API→シーケンス＋スキーマ差分、IaC→構成図差分）— 読み慣れで承認が速くなる</li>
+            <li>「分かりにくい」の指摘は提示形式へ還元（メタループ対象）</li>
+          </ol>
+        </div>
+        <div class="gate">
+          <span class="g-mark">ゲート②</span>
+          <span class="g-body"><b>実現案の承認 ＝ 現在の知識で最善という仮説の採択</b>。実装はその反証実験。差し戻しは失敗ではなく想定内動作</span>
+        </div>
+        <div class="dispatch"><b>分配ポイントB（水平・単位が大きすぎる時のみ）</b>：実現案が定義したインターフェース契約（APIスキーマ等）に沿って実装だけを分ける。契約凍結前の水平分割は禁止</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="card">
+        <div class="phase-name">実装 <span class="unit-tag">単位ごと</span></div>
+        <ul class="steps">
+          <li>承認済み実現案に沿って実行（Opus 5）。実装は純粋な実行ではなく<b>最後の調査フェーズを兼ねる</b></li>
+          <li class="warn">前提崩壊の申告プロトコル：「前提Xが崩れた。現地はこうだ」と申告して停止することを正常な出力として定義。回避策を積んで実現案を守り抜かない（隠すコストが最も高い）</li>
+        </ul>
+        <div class="fallback">
+          <b>3方向差し戻し（崩れたものの種類で分岐）</b>
+          <ul>
+            <li>実現案の選択が誤り → ゲート②へ。却下理由を背景に追記（同じ袋小路に二度入らない）</li>
+            <li>期待の前提が誤り → ゲート①へ。変更履歴に「実装時の発見により改訂」</li>
+            <li>負債が独立した障害物 → 実行時分割：負債解消単位＋機能単位（依存）に切り、それぞれ通常フローへ</li>
+          </ul>
+        </div>
+        <div class="note">前提崩壊はマップの該当項目を同時修正（例外系更新）。崩壊率は領域別に集計 → コードベースの健康診断指標・負債返済Issueの起票根拠</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="card">
+        <div class="phase-name">品質担保 <span class="unit-tag">単位ごと＋統合</span></div>
+        <ul class="steps">
+          <li>実装内容の図解（実現案と同形式）→ 実現案図と機械突合。「図解しか見ない」運用の前提を機械が担保</li>
+          <li>E2Eテスト：期待の各行→観測可能な振る舞いへ翻訳。統合期待は親Issue側で検証</li>
+          <li>期待→テスト対応表＋エビデンス（スクリーンショット・実行ログ）— 全行カバーの機械的証明</li>
+          <li>システムマップdiffを生成（正常系更新。マージに同梱）</li>
+        </ul>
+        <div class="gate">
+          <span class="g-mark">ゲート③</span>
+          <span class="g-body"><b>フィードバック（2モード）</b> — 人間が読むコードは実装ではなく<b>テストコード</b>（期待と同じ語彙で書かれ、AIの解釈が最も裸で現れる場所）</span>
+        </div>
+        <div class="mode">
+          <span class="m1"><b>育成モード（初期）</b>図解＋テストコードを厳格にチェック。「このケースはダメ」「この実装だと〜が起きる」を具体的に出す → 資産へ変換。⚠に挙がっていなかった指摘の率を計測（検出漏れの実測）</span>
+          <span class="m2"><b>巡航モード（成熟後）</b>図解のみ。移行条件：⚠外指摘率が十分低下＋図解⇔実装突合の機械化が安定。移行を急がないことが性善説の担保</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase merge">
+      <div class="card">
+        <div class="phase-name">PRマージ <span class="unit-tag">小さなPRの束</span></div>
+        <ul class="steps">
+          <li>コードとマップdiffが同一コミットで整合。期待文書はクローズ（短命）、背景・決定・evalは資産へ（長命）</li>
+          <li>QAフェーズ（後続）のNGはNG調査へフィードバック</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ 右カラム ============ -->
+  <div class="side">
+
+    <div class="panel ng">
+      <h2>例外フロー：NG調査</h2>
+      <p>承認済み成果物を境界に証拠連鎖を逆向きに二分探索。分割済みのため爆風半径は1単位。</p>
+      <div class="route"><b>期待に書かれていない</b><span class="to">→ 解明の欠陥。人間の再承認イベント</span></div>
+      <div class="route"><b>実現案・実装が乖離</b><span class="to">→ 差し戻しリトライ。期待は不変</span></div>
+      <div class="route"><b>テストが未検出</b><span class="to">→ テスト観点の漏れ</span></div>
+      <div class="route"><b>トリアージの誤判定</b><span class="to">→ 判定基準の改訂</span></div>
+      <div class="route"><b>プロセスの誤り</b><span class="to">→ 資産改訂（宛先つきdiff提案）</span></div>
+    </div>
+
+    <div class="panel asset">
+      <h2>資産（沈殿先）</h2>
+      <div class="route"><b>evalセット</b><span class="to">永続資産の本体。実運用Issueが素材。SKILL.mdより長生きする仕様</span></div>
+      <div class="route"><b>システムマップ</b><span class="to">索引であって本文ではない（場所・関係・鮮度のポインタ集。要約の転記禁止）。鮮度メタデータ必須：最終確認Issue＋日付、古い項目は「未確認」へ自動降格。更新3経路＝マージ時（正常系）／前提崩壊時（例外系）／網羅的調査時（探索系）。内容は事実のみ＝人間ゲート不要、スキーマ変更のみ資産diffとして承認</span></div>
+      <div class="route"><b>期待テンプレート／SKILL.md群</b><span class="to">世代ごとに書き直し可能な実装</span></div>
+      <div class="route"><b>CLAUDE.md・コンテキスト文書</b><span class="to">コードから読めない恒久知識</span></div>
+      <div class="route"><b>決定ログ</b><span class="to">仕分け結果・フェーズ別NG混入率・前提崩壊率の集計元</span></div>
+    </div>
+
+    <div class="panel ctx">
+      <h2>コンテキスト最小化（実行時の規律）</h2>
+      <p>コンテキストは渡さず、取りに行かせる。マップはその索引。</p>
+      <div class="route"><b>フェーズ別入力契約</b><span class="to">各SKILL.md冒頭に「読んでよいもの」全列挙＋「読んではいけないもの」明記。例：突合役に実現案の判断理由を読ませない（採点が甘くなる）— 最小化は独立性の注入でもある</span></div>
+      <div class="route"><b>フェーズ間は成果物のみ</b><span class="to">会話履歴を持ち越さない。往復は期待文書と変更履歴に蒸留された時点で役目を終える</span></div>
+      <div class="route"><b>予算の計測</b><span class="to">フェーズ別トークン・読了ファイル数を試走から記録。契約外読込は契約かマップの欠陥としてメタループへ</span></div>
+    </div>
+
+    <div class="panel gen">
+      <h2>世代交代ループ（skill-gardener）</h2>
+      <p>モデル更新を検知したらスキルを剪定する。ドメイン知識は残し、旧モデルの欠陥補正だけを削る。</p>
+      <div class="route"><b>1. 新モデルでeval再実行</b><span class="to">使用頻度・NG混入率の高い順</span></div>
+      <div class="route"><b>2. Ablation</b><span class="to">指示ブロック単位で抜いて再eval。抜いても落ちない＝削除候補</span></div>
+      <div class="route"><b>3. 新モデル特有の失敗へ補正提案</b></div>
+      <div class="route"><b>4. diff提案→人間承認</b><span class="to">gardener自身の改訂は人間レビューを厚く（自己言及禁止）</span></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="cycle">
+  <b>メタループ（当面は週次の手動棚卸し）：</b>解明の訂正履歴（事前の予防接種）＋育成モードの具体的指摘＋QA NG＋NG混入率＋前提崩壊率＋コンテキスト予算が、資産diffへ沈殿。フェーズ別混入率が投資判断と育成→巡航移行の根拠。世代交代ループが資産をモデル更新のたびに剪定し、evalセットだけが世代を越えて生き残る。
+</div>
+
+<div class="skilltable">
+  <h2>スキルとモデル割当</h2>
+  <div class="principle">原則：曖昧さ・トレードオフの判断＝<b>Fable 5</b>／決まったことを決まった通りに＝<b>Opus 5</b>／機械的照合・翻訳＝<b>Sonnet 5</b>。evalは常に実際に使うモデルで実行。<span class="first-tag">初期実装</span>＝試走で最初に作る3点。残りは素のClaude Codeへの都度指示で代替し、痛みが観測されてからスキル化。</div>
+  <table>
+    <tr><th>スキル</th><th>担当</th><th>モデル</th><th>割当理由</th></tr>
+    <tr class="first">
+      <td class="sk">clarify-expectation<span class="first-tag">初期実装</span></td>
+      <td>詳細化・質問ルーター・変更履歴・E2E可能語彙のプリフライト（＋当面decompose-issueを内包）</td>
+      <td><span class="chip fable">Fable 5</span></td>
+      <td class="why">曖昧さの検出がフロー全体の品質上限。「各行はE2Eで観測可能か」の検査を含む</td>
+    </tr>
+    <tr>
+      <td class="sk">decompose-issue</td>
+      <td>最大分割・依存グラフ・統合期待。実行時モード（負債の切り出し）を含む</td>
+      <td><span class="chip fable">Fable 5</span></td>
+      <td class="why">「独立に検証可能な最小単位」の切り出しは設計判断。肥大したらclarifyから分離</td>
+    </tr>
+    <tr>
+      <td class="sk">survey-codebase</td>
+      <td>網羅的調査（L経路）・マトリクス消込・マップ拡充</td>
+      <td><span class="chip opus">Opus 5</span></td>
+      <td class="why">網羅的探索の正確性勝負。領域別に並列サブエージェント→集約</td>
+    </tr>
+    <tr>
+      <td class="sk">investigate-codebase</td>
+      <td>単位ごとの現状調査・領域判定</td>
+      <td><span class="chip opus">Opus 5</span></td>
+      <td class="why">定型手順の正確な探索。判断より網羅</td>
+    </tr>
+    <tr>
+      <td class="sk">propose-with-diagram</td>
+      <td>実現案＋提示仕様準拠の図解（三層・⚠・却下案・形式固定）</td>
+      <td><span class="chip fable">Fable 5</span></td>
+      <td class="why">トレードオフの選択と違和感検出器の生成。レンダリングはスクリプトへ</td>
+    </tr>
+    <tr>
+      <td class="sk">（実装）</td>
+      <td>自作スキルなし。既存の型＋前提崩壊申告プロトコル</td>
+      <td><span class="chip opus">Opus 5</span></td>
+      <td class="why">決まったことを決まった通りに。Fable不要（方針どおり）</td>
+    </tr>
+    <tr class="first">
+      <td class="sk">verify-traceability<span class="first-tag">初期実装</span></td>
+      <td>図解突合・期待→テスト対応表・エビデンス・マップdiff生成</td>
+      <td><span class="chip sonnet">Sonnet 5</span></td>
+      <td class="why">照合と翻訳。高頻度なのでコスト効率優先。迷う差分のみ上位へエスカレーション。人間の理解の入力の忠実性を担保する土台</td>
+    </tr>
+    <tr class="first">
+      <td class="sk">（期待テンプレート）<span class="first-tag">初期実装</span></td>
+      <td>Issueの「期待」（人間承認）／「コンテキスト」（承認不要）の2部構成＋非機能の定型欄</td>
+      <td>—</td>
+      <td class="why">スキルではなく.github/ISSUE_TEMPLATE。全工程の正解の定義</td>
+    </tr>
+    <tr>
+      <td class="sk">attribute-defect</td>
+      <td>NG調査・帰属・改訂diff提案</td>
+      <td><span class="chip fable">Fable 5</span></td>
+      <td class="why">因果推論と抽象化。低頻度・高価値</td>
+    </tr>
+    <tr>
+      <td class="sk">distill-feedback</td>
+      <td>ゲート③指摘の資産diff化（当面は手動棚卸し）</td>
+      <td><span class="chip fable">Fable 5</span></td>
+      <td class="why">個別→一般則の昇華。育成→巡航遷移の心臓部</td>
+    </tr>
+    <tr>
+      <td class="sk">skill-gardener</td>
+      <td>モデル更新検知・eval再実行・ablation剪定</td>
+      <td><span class="chip fable">Fable 5</span></td>
+      <td class="why">剪定判断はFable、eval実行は移行先の各モデルで</td>
+    </tr>
+  </table>
+</div>
+
+<div class="rollout">
+  <div class="box now">
+    <h3>初期実装（試走の装備）</h3>
+    <ul>
+      <li>期待テンプレート＋clarify-expectation＋verify-traceability の3点のみ</li>
+      <li>他フェーズは素のClaude Code＋本設計文書への都度指示で一周する</li>
+      <li>試走の観測項目：解明の往復回数／各ゲートの承認時間と読み味／前提崩壊の有無／QA NGの有無／フェーズ別コンテキスト消費 — これが最初のeval素材</li>
+      <li>独立レビューを1箇所：マージ前に期待文書と実装だけを渡した別コンテキストのレビュー（実現案・対応表を見せない）— 自己採点の相関を切る最安の手段</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>仮説リスト（設計に足さず、試走で検証する）</h3>
+    <ul>
+      <li>Sの軽量経路の具体形（1コメント畳み込みの書式）</li>
+      <li>clarify / decompose の統合維持か分離か</li>
+      <li>⚠予算の適正数（3で足りるか）</li>
+      <li>マップの鮮度閾値（何日/何Issueで未確認へ降格するか)</li>
+      <li>コンテキスト契約の中身（実現案に変更履歴を見せるか等）</li>
+      <li>本番シグナル（障害・報告）のNG調査への還流 — QAすり抜け率が問題になってから</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
