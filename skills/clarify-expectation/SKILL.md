@@ -13,7 +13,7 @@ description: Use when a GitHub Issue (or a Slack report pasted into one) needs t
 ## 入力契約
 
 読んでよいもの(全列挙):
-- 対象 Issue の本文・コメント(`gh issue view <n> --comments`)、および Issue 内リンク先
+- 対象 Issue の本文・コメント(`gh issue view <n> --comments`)、および Issue 内リンク先。トリアージ結果と網羅的調査の結果はここに含まれる
 - コードベース(README・設計メモを含む。現状調査のため。読んだ事実は「コンテキスト > 調査結果」へ)
 - `${CLAUDE_PLUGIN_ROOT}/templates/ISSUE_TEMPLATE/expectation.md`(出力書式)
 - `${CLAUDE_PLUGIN_ROOT}/DESIGN.md`
@@ -24,7 +24,7 @@ description: Use when a GitHub Issue (or a Slack report pasted into one) needs t
 
 ## 手順
 
-1. **トリアージ** S/M/L と根拠一行。根拠には改修/新規と領域(FE/BE/IaC/データ)を含める。迷ったら上へ。L なら「網羅的調査が前提」と Issue に明記し、本スキルでは分割に進まない
+1. **トリアージ結果を読む** triage-issue の判定と根拠を期待節のトリアージ欄に転記する。未判定なら先に triage-issue を実行する。L で survey-codebase の結果が無ければ、それを先に実行する(未確認セルは⚠候補として受け取る)。S なら手順4〜6を1コメントに畳んでよいが、承認は省かない
 2. **現状調査** 改修/新規、FE/BE/IaC/データの領域判定。事実は調査結果へ、仮説は仮説と明記
 3. **質問ルーター** 湧いた疑問を3分類してから動く
    | 分類 | 判定基準 | 処理 |
