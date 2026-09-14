@@ -18,7 +18,7 @@ claude plugin install github-flow@claude-skills
 
 | plugin | 内容 |
 |---|---|
-| [`plugins/github-flow/`](plugins/github-flow/) | GitHub Issue を AI と解くフロー。設計思想(DESIGN.md)と、トリアージ→網羅的調査→解明→品質担保の照合までのスキル群、期待テンプレート |
+| [`plugins/github-flow/`](plugins/github-flow/) | GitHub Issue を AI と解くフロー。設計思想(DESIGN.md)と、トリアージ→網羅的調査→解明→品質担保の照合までのスキル群 |
 
 ## レイアウト
 

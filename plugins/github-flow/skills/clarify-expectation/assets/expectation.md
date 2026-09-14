@@ -1,9 +1,4 @@
----
-name: 期待(github-flow)
-about: AI と解く Issue の標準書式。「期待」は人間承認の対象、「コンテキスト」はエージェント向け
-title: ""
-labels: []
----
+<!-- clarify-expectation の出力書式。既存 Issue の本文をこの2部構成に書き直す -->
 
 ## 期待
 

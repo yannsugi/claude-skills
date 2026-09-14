@@ -105,7 +105,7 @@ Claude Codeでの実装生成時に参照する思想文書。実装(SKILL.md等
 
 ## 初期実装(試走の装備)と仮説リスト
 
-作るのは3点のみ:期待テンプレート+clarify-expectation+verify-traceability。
+作るのは3点のみ:期待の書式(clarify-expectation 同梱の出力書式。対象は既存 Issue で、新規起票フォームは持たない)+clarify-expectation+verify-traceability。
 他は素のClaude Code+本文書への都度指示で一周し、痛みを観測してからスキル化。
 既存スキルの流用可否(diagram-design、webapp-testing、interview-me等)は
 エンジンとして評価し、契約(本文書の規律)は自作を維持する。

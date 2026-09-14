@@ -15,7 +15,7 @@ description: Use when a GitHub Issue (or a Slack report pasted into one) needs t
 読んでよいもの(全列挙):
 - 対象 Issue の本文・コメント(`gh issue view <n> --comments`)、および Issue 内リンク先。トリアージ結果と網羅的調査の結果はここに含まれる
 - コードベース(README・設計メモを含む。現状調査のため。読んだ事実は「コンテキスト > 調査結果」へ)
-- `${CLAUDE_PLUGIN_ROOT}/templates/ISSUE_TEMPLATE/expectation.md`(出力書式)
+- `assets/expectation.md`(このスキル同梱の出力書式)
 - `${CLAUDE_PLUGIN_ROOT}/DESIGN.md`
 
 読んではいけないもの:
@@ -34,7 +34,7 @@ description: Use when a GitHub Issue (or a Slack report pasted into one) needs t
    | 些末 | どちらでも品質に効かない | デフォルト案で進め「些末判断」に記録(通知のみ) |
    ビジネスか些末かで迷ったときだけ聞く側へ倒す。技術判断を人間に投げない
    回答を待たずに進める場合、暫定値は変更履歴に「暫定・回答待ち」と記す。些末判断には書かない(業務判断を些末に見せない)
-4. **期待の詳細化** テンプレートを埋める。Asis/Tobe は「誰が・どこで・何をすると・何が起きる」の一行一観測
+4. **期待の詳細化** `assets/expectation.md` の書式で Issue 本文を書き直す。Asis/Tobe は「誰が・どこで・何をすると・何が起きる」の一行一観測
 5. **E2E 語彙プリフライト** 期待節の各行を検査:
    - E2E(画面操作・API 呼び出し・ファイル着信・ログ出力)で観測できない行 → 書き直すか、コンテキストへ移す
    - クラス名・ライブラリ名・テーブル名・環境変数名などの実装語彙 → コンテキストへ移す
