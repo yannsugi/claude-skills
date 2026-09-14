@@ -1,0 +1,16 @@
+{
+  "name": "claude-skills",
+  "owner": { "name": "yannsugi" },
+  "metadata": {
+    "description": "yannsugi の個人用 Claude Code プラグイン集。ローカルで使う前提",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "github-flow",
+      "source": "github-flow",
+      "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)。トリアージ→網羅的調査→解明のスキルと、品質担保の照合スキル、期待テンプレート",
+      "version": "0.1.0"
+    }
+  ]
+}
