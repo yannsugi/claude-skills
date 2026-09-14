@@ -33,7 +33,7 @@ description: Use when a PR is ready for merge review and someone must confirm th
    - **uncovered**: 対応テストがない、または unit のみで E2E の観測がない
    - **escalate**: 一致するか迷う。理由を一行添えて上位(人間または Fable)へ渡す。自分で白黒をつけない
 5. 未カバー一覧と escalate 一覧を分けて出す
-6. `gh pr comment <n> --body-file` で投稿。文面は対応表 + 未カバー + escalate のみ。マージ可否の提案、リスク受容の交渉、フォローアップの推奨は書かない(判断は人間の役割)
+6. 対応表 + 未カバー + escalate のみを文面として利用者に提示する。`gh pr comment <n> --body-file` での投稿は、利用者が明示的に指示した場合にのみ実行する。マージ可否の提案、リスク受容の交渉、フォローアップの推奨は書かない(判断は人間の役割)
 
 試走でローカルファイル `<name>.md` を対象にする場合は、PR コメント文面を `<name>.traceability.md` に書く。
 
