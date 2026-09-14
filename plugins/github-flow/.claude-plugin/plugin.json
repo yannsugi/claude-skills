@@ -12,5 +12,6 @@
     "workflow",
     "triage",
     "traceability"
-  ]
+  ],
+  "license": "MIT"
 }

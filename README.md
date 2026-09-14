@@ -32,3 +32,7 @@ plugins/<name>/                   # 1プラグイン1ディレクトリ
 
 新しいプラグインは `plugins/` に追加し、marketplace.json の `plugins` に1行足す。
 `claude plugin validate .` で検証できる。
+
+## License
+
+MIT
