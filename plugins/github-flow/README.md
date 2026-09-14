@@ -26,7 +26,7 @@ Claude Code のプラグイン(`.claude-plugin/plugin.json`)。`yannsugi/claude-
 | `skills/verify-traceability/` | 品質担保の照合役(Sonnet 5)。期待→テスト対応表・未カバー・エスカレーション。`gh pr comment` で出力 |
 | `docs/` | 実装ごとの設計メモ |
 
-`github_issue_flow_v3.html` はブラウザで直接開いて読む(ビルド不要)。
+`github_issue_flow_v3.html` はブラウザで直接開いて読む(ビルド不要)。GitHub 上からは [図解を開く](https://raw.githack.com/yannsugi/claude-skills/main/plugins/github-flow/github_issue_flow_v3.html)(repo が public のときのみ表示される)。
 
 ```bash
 open github_issue_flow_v3.html
