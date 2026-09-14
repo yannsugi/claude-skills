@@ -1,11 +1,16 @@
 {
   "name": "tanukibox-github-flow",
-  "owner": { "name": "yannsugi" },
+  "owner": {
+    "name": "yannsugi"
+  },
   "plugins": [
     {
       "name": "github-flow",
       "source": "./",
       "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)の試走装備"
     }
-  ]
+  ],
+  "metadata": {
+    "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)のスキル群。tanukibox の試走用"
+  }
 }
