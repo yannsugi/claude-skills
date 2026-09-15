@@ -36,3 +36,12 @@ plugins/<name>/                   # 1プラグイン1ディレクトリ
 ## License
 
 MIT
+
+## 更新の反映
+
+スキルを変更したら **plugin.json と marketplace.json の version を上げてから** push する。
+バージョンが同じままだと `marketplace update` してもインストール済みキャッシュは差し替わらない。
+
+```bash
+claude plugin marketplace update claude-skills && claude plugin update github-flow@claude-skills
+```
