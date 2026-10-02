@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GitHub Issue解決フロー v3（凍結版・北極星）</title>
+<title>GitHub Issue解決フロー</title>
 <style>
   :root{
     --paper:#F7F8F6;
@@ -163,17 +163,17 @@
 <div class="wrap">
 
 <header>
-  <h1>GitHub Issue解決フロー v3<span class="frozen">凍結版・北極星</span></h1>
-  <div class="sub">方針：開発者の労力を最小に（将来の労力を含む通時的最小化）、最大の品質を。承認は労力ではなく理解を生産する投資。GitHub＝具体、Slack＝抽象。以後の改善は本設計への追加ではなく、試走で検証する仮説として扱う。</div>
+  <h1>GitHub Issue解決フロー</h1>
+  <div class="sub">方針：開発者の労力を最小に（将来の労力を含む通時的最小化）、最大の品質を。承認は労力ではなく理解を生産する投資。GitHub＝具体、Slack＝抽象。人間は散文を読まない — 承認の対象は表と格子で出す。本図とDESIGN.mdは試走の観測に合わせて常に書き直す（過去の版はgitにある）。</div>
 </header>
 
 <div class="creed">
   <div class="box">
     <h3>人間が理解するのはこの3点だけ</h3>
     <ul>
-      <li><b>期待の正しさ</b>（ゲート①）— 問題を正しく捉えたか</li>
-      <li><b>判断の方向</b>（ゲート②）— 進み方は妥当か（承認＝仮説の採択。実装は反証実験）</li>
-      <li><b>翻訳の一致</b>（ゲート③）— 期待がテストに正しく落ちたか</li>
+      <li><b>要件の正しさ</b>（ゲート①）— 問題を正しく捉えたか。読むのは完了基準C・受け入れ基準Tの表・状態×操作の格子</li>
+      <li><b>判断の方向</b>（ゲート②）— 進み方は妥当か（承認＝仮説の採択。実装は反証実験）。読むのはTごとの対応可否の目次表</li>
+      <li><b>翻訳の一致</b>（ゲート③）— TがテストにE2Eで正しく落ちたか。読むのはT→テスト対応表とテストコード</li>
     </ul>
   </div>
   <div class="box">
@@ -202,11 +202,11 @@
 
     <div class="phase branch">
       <div class="card">
-        <div class="phase-name">トリアージ<small>S / M / L 判定＋根拠を一行記録（ゲート①で人間の目に入る）</small></div>
+        <div class="phase-name">トリアージ <code>req-1-triage-issue</code><small>S / M / L 判定＋根拠を一行記録＋完了基準 C1〜Cn をIssueの語のまま採番（Cが後続全工程の背骨）</small></div>
         <ul class="steps">
-          <li><b>S</b>：軽量経路（解明と実現案を1コメントに畳む。承認は省かない — 理解コストが小さいから速いだけ）</li>
+          <li><b>S</b>：軽量経路（要件整理と実現案を1コメントに畳む。承認は省かない — 理解コストが小さいから速いだけ）</li>
           <li><b>M</b>:標準経路（下記フルフロー）</li>
-          <li><b>L</b>:網羅的調査を前置してからフルフロー</li>
+          <li><b>L</b>:網羅的調査を前置してからフルフロー。「各Cを既存機能で満たせるか」を調査へ渡す</li>
         </ul>
         <div class="note">誤判定はNG調査の帰属先の一つ（L相当をMと誤ると調査不足のまま分割し多単位で崩壊する）</div>
       </div>
@@ -214,55 +214,57 @@
 
     <div class="phase">
       <div class="card">
-        <div class="phase-name">網羅的調査<small>Lのみ・最大分割の前提条件</small></div>
+        <div class="phase-name">網羅的調査 <code>req-2-survey-codebase</code><small>Lのみ・最大分割の前提条件</small></div>
         <ul class="steps">
           <li>領域×観点マトリクス（FE/BE/IaC/データ × 参照/変更/暗黙の依存）の全セルを「確認済み/未確認」で埋める — 網羅の定義を先に固定し自己申告を検証可能にする</li>
-          <li>システムマップを起点に差分確認（全量探索は初回のみ。以降は地図の更新）。並列サブエージェントで領域ごとに探索し集約</li>
-          <li class="warn">未確認セルは⚠として期待側に浮上し、ゲート①で人間の目に入る</li>
+          <li>上層＝Cごとの3問表（既存で満たせるか／新規の仕組みが要るか／repo外依存）＋新規成果物の種類ごとの直近の前例1件。下層＝影響マップ（つながり＝直接/経由/関係しうる）</li>
+          <li>システムマップを起点に差分確認（全量探索は初回のみ）。並列サブエージェントで領域ごとに探索し集約。ゲート・フラグ・権限の行は原文の根拠行を残す</li>
+          <li class="warn">未確認セルは⚠として要件側に浮上し、ゲート①で人間の目に入る。マスタ・seedは実運用と一致しない前提</li>
         </ul>
-        <div class="note">産物：影響マップ（確信度つき）→ システムマップへ還元（探索系更新）</div>
+        <div class="note">産物：C表＋前例＋マトリクス＋影響マップ → システムマップへ還元（出力先は作業メモ。repoへは明示指示時のみ）</div>
       </div>
     </div>
 
     <div class="phase">
       <div class="card">
-        <div class="phase-name">解明フェーズ<small>曖昧さの解消＋問題の最大分割</small></div>
+        <div class="phase-name">要件整理 <code>req-3-clarify-expectation</code><small>曖昧さの解消＋問題の最大分割。Issue見出しは「実装前の要件・受け入れ基準の整理」</small></div>
         <ul class="steps">
-          <li class="loop">期待の詳細化 ⇄ 現状調査（改修/新規、FE・BE・IaC領域判定）</li>
-          <li>質問ルーター：ビジネス判断→人間／技術判断→調査で自己解決／些末→デフォルト案＋通知</li>
-          <li class="split"><b>最大分割</b>：独立に検証可能な最小の期待単位へ。依存グラフ作成。単位を跨ぐ期待は「統合期待」として親Issueに残す</li>
-          <li>期待の変更履歴：どの調査結果を受けて、どの行が、なぜ変わったか（実装からの還流も受ける）</li>
+          <li>業務背景3〜5行 → 現状調査（改修/新規、領域判定。技術事実は囲みブロックを読んでから断定）</li>
+          <li class="split"><b>状態×操作の格子</b>：Given×Whenに既存操作（取消・一括・権限なし）を既定で並べ、全セルをT／対象外／要件確認で埋める。「ルールが効かない側」のセルを1つずつ確認</li>
+          <li><b>受け入れ基準の表</b>（ID/基準/Entry/Actor/Given/When/Then/Issue/E2E）：格子のセルと1対1。Cとの対応表を直前に置く。初版から表で出す</li>
+          <li>質問ルーター：ビジネス判断→要件確認（平坦なID＋「認識どおり/違う」、1問3文以内）／技術判断→調査で自己解決／些末→デフォルト案＋通知</li>
+          <li>最大分割：独立に検証可能かつ単体でマージできる単位へ。子IssueはTのIDで参照。切れない結合は統合期待として親に残す。変更履歴は3列でdetailsへ</li>
         </ul>
-        <div class="note">産物：単位ごとの期待文書（Asis/Tobe・影響画面・制約。実装語彙を含まない）＋変更履歴＋依存グラフ＋背景コンテキスト</div>
+        <div class="note">産物：要件・受け入れ基準の整理（実装語彙を含まない）＋要件確認＋分割表＋コンテキスト。呼びかけ文・フロー用語は書かない</div>
         <div class="gate">
           <span class="g-mark">ゲート①</span>
-          <span class="g-body"><b>期待＋変更履歴＋分割の承認</b> — 提示は差分中心：L1＝単位一覧と依存図＋初版から変わった行のハイライト、L2＝変更理由と分割根拠。人間は「なぜこの形に変わったか」の妥当性だけ判断</span>
+          <span class="g-body"><b>C/T表＋格子＋要件確認＋分割の承認</b> — 2回目以降は変わった行の差分中心。人間は「問題を正しく捉えたか」と要件確認への回答だけ</span>
         </div>
-        <div class="dispatch"><b>分配ポイントA（垂直・原則）</b>：承認済みの期待単位ごとに担当（人間/エージェント）へ配り、以降のパイプラインを丸ごと持たせる。契約が凍結された地点でのみ安全に並列化できる — 解明フェーズ自体は分配不能（曖昧なまま配ると解釈が人数分に複製される）</div>
+        <div class="dispatch"><b>分配ポイントA（垂直・原則）</b>：承認済みの受け入れ基準の単位（子Issue）ごとに担当（人間/エージェント）へ配り、以降のパイプラインを丸ごと持たせる。契約が凍結された地点でのみ安全に並列化できる — 要件整理自体は分配不能（曖昧なまま配ると解釈が人数分に複製される）</div>
       </div>
     </div>
 
     <div class="phase">
       <div class="card">
-        <div class="phase-name">実現案 <span class="unit-tag">単位ごと</span></div>
+        <div class="phase-name">実現案 <code>design-1-propose-with-diagram</code><span class="unit-tag">単位ごと</span></div>
         <ul class="steps">
-          <li>実現案の作成（背景コンテキスト＋依存グラフ＋マップを判断材料に）</li>
+          <li>候補を2つ以上立ててから書く（コンテキスト＋マップ＋同じ親の他単位の実現案を判断材料に）</li>
         </ul>
         <div class="spec">
           <b>提示仕様（違和感の検出器として設計する）</b>
           <ol>
-            <li>期待の語彙で書く — 振る舞いの因果が主表現。実装語彙はL3へ</li>
-            <li>三層：L1＝図1枚（ここだけでNG判断が成立）／L2＝判断根拠と<b>却下案＋却下理由</b>／L3＝実装計画（人間は原則見ない）</li>
-            <li>⚠の名指し（予算：最大3）— リスク・低確信・解釈が入った箇所をAI自身が宣言</li>
-            <li>図形式は変更タイプ別に固定（画面→Before/After状態遷移、API→シーケンス＋スキーマ差分、IaC→構成図差分）— 読み慣れで承認が速くなる</li>
-            <li>「分かりにくい」の指摘は提示形式へ還元（メタループ対象）</li>
+            <li>目次表が先：Tごとに対応可否／対応内容／機能単位。可否は「あり」「なし（Tnで達成）」の短い語だけ。直後に「実装が要るのはTnだけ」を1行</li>
+            <li>変更がある機能単位（画面/クエリ/バッチ/マスタ）だけ節を書く。利用者の語で</li>
+            <li>図は任意：機能単位が3つ以上か依存があるときだけ。描かないなら「省略」と明記。描くなら変更タイプ別の型（画面→Before/After状態遷移、API→シーケンス＋スキーマ差分、IaC→構成図差分、データ→流れのBefore/After）</li>
+            <li>根拠・<b>却下案＋却下理由</b>・⚠の名指し（予算：最大3）</li>
+            <li><code>&lt;details&gt;実装メモ（AI用）&lt;/details&gt;</code> 必須：触るファイルと順序・インターフェース契約・検証コマンド。人間向け本文と混ぜない。末尾に修正履歴</li>
           </ol>
         </div>
         <div class="gate">
           <span class="g-mark">ゲート②</span>
           <span class="g-body"><b>実現案の承認 ＝ 現在の知識で最善という仮説の採択</b>。実装はその反証実験。差し戻しは失敗ではなく想定内動作</span>
         </div>
-        <div class="dispatch"><b>分配ポイントB（水平・単位が大きすぎる時のみ）</b>：実現案が定義したインターフェース契約（APIスキーマ等）に沿って実装だけを分ける。契約凍結前の水平分割は禁止</div>
+        <div class="dispatch"><b>分配ポイントB（水平・単位が大きすぎる時のみ）</b>：実現案が定義したインターフェース契約（APIスキーマ等）に沿って実装だけを分ける。契約凍結前の水平分割は禁止。子PRは単体で既定ブランチにマージできる単位（積み上げPRにしない）</div>
       </div>
     </div>
 
@@ -270,14 +272,14 @@
       <div class="card">
         <div class="phase-name">実装 <span class="unit-tag">単位ごと</span></div>
         <ul class="steps">
-          <li>承認済み実現案に沿って実行（Opus 5）。実装は純粋な実行ではなく<b>最後の調査フェーズを兼ねる</b></li>
+          <li>承認済み実現案の実装メモ（AI用）に沿って実行（Opus 5.5）。実装は純粋な実行ではなく<b>最後の調査フェーズを兼ねる</b></li>
           <li class="warn">前提崩壊の申告プロトコル：「前提Xが崩れた。現地はこうだ」と申告して停止することを正常な出力として定義。回避策を積んで実現案を守り抜かない（隠すコストが最も高い）</li>
         </ul>
         <div class="fallback">
           <b>3方向差し戻し（崩れたものの種類で分岐）</b>
           <ul>
             <li>実現案の選択が誤り → ゲート②へ。却下理由を背景に追記（同じ袋小路に二度入らない）</li>
-            <li>期待の前提が誤り → ゲート①へ。変更履歴に「実装時の発見により改訂」</li>
+            <li>要件の前提が誤り → ゲート①へ。変更履歴に「実装時の発見により改訂」</li>
             <li>負債が独立した障害物 → 実行時分割：負債解消単位＋機能単位（依存）に切り、それぞれ通常フローへ</li>
           </ul>
         </div>
@@ -287,20 +289,19 @@
 
     <div class="phase">
       <div class="card">
-        <div class="phase-name">品質担保 <span class="unit-tag">単位ごと＋統合</span></div>
+        <div class="phase-name">品質担保 <code>verify-1-traceability</code><span class="unit-tag">単位ごと＋統合</span></div>
         <ul class="steps">
-          <li>実装内容の図解（実現案と同形式）→ 実現案図と機械突合。「図解しか見ない」運用の前提を機械が担保</li>
-          <li>E2Eテスト：期待の各行→観測可能な振る舞いへ翻訳。統合期待は親Issue側で検証</li>
-          <li>期待→テスト対応表＋エビデンス（スクリーンショット・実行ログ）— 全行カバーの機械的証明</li>
-          <li>システムマップdiffを生成（正常系更新。マージに同梱）</li>
+          <li>E2Eテスト：Tの各行→観測可能な振る舞いへ翻訳。統合期待は親Issue側で検証</li>
+          <li>T→テスト対応表＋エビデンス（スクリーンショット・実行ログ）— 全行カバーの機械的証明。TのIDはそのまま使う。判定はcovered/uncovered/escalateの3値のみ</li>
+          <li>実装図解の機械突合・システムマップdiff生成は未実装（図が任意になったため、必要になったら設計し直す）</li>
         </ul>
         <div class="gate">
           <span class="g-mark">ゲート③</span>
-          <span class="g-body"><b>フィードバック（2モード）</b> — 人間が読むコードは実装ではなく<b>テストコード</b>（期待と同じ語彙で書かれ、AIの解釈が最も裸で現れる場所）</span>
+          <span class="g-body"><b>フィードバック（2モード）</b> — 人間が読むコードは実装ではなく<b>テストコード</b>（Tと同じ語彙で書かれ、AIの解釈が最も裸で現れる場所）</span>
         </div>
         <div class="mode">
-          <span class="m1"><b>育成モード（初期）</b>図解＋テストコードを厳格にチェック。「このケースはダメ」「この実装だと〜が起きる」を具体的に出す → 資産へ変換。⚠に挙がっていなかった指摘の率を計測（検出漏れの実測）</span>
-          <span class="m2"><b>巡航モード（成熟後）</b>図解のみ。移行条件：⚠外指摘率が十分低下＋図解⇔実装突合の機械化が安定。移行を急がないことが性善説の担保</span>
+          <span class="m1"><b>育成モード（初期）</b>対応表＋テストコードを厳格にチェック。「このケースはダメ」「この実装だと〜が起きる」を具体的に出す → 資産へ変換。⚠に挙がっていなかった指摘の率を計測（検出漏れの実測）</span>
+          <span class="m2"><b>巡航モード（成熟後）</b>対応表のみ。移行条件：⚠外指摘率が十分低下。移行を急がないことが性善説の担保</span>
         </div>
       </div>
     </div>
@@ -309,7 +310,7 @@
       <div class="card">
         <div class="phase-name">PRマージ <span class="unit-tag">小さなPRの束</span></div>
         <ul class="steps">
-          <li>コードとマップdiffが同一コミットで整合。期待文書はクローズ（短命）、背景・決定・evalは資産へ（長命）</li>
+          <li>要件整理の文書はクローズ（短命）、背景・決定・evalは資産へ（長命）。各PRは単体で既定ブランチにマージできる</li>
           <li>QAフェーズ（後続）のNGはNG調査へフィードバック</li>
         </ul>
       </div>
@@ -323,8 +324,8 @@
     <div class="panel ng">
       <h2>例外フロー：NG調査</h2>
       <p>承認済み成果物を境界に証拠連鎖を逆向きに二分探索。分割済みのため爆風半径は1単位。</p>
-      <div class="route"><b>期待に書かれていない</b><span class="to">→ 解明の欠陥。人間の再承認イベント</span></div>
-      <div class="route"><b>実現案・実装が乖離</b><span class="to">→ 差し戻しリトライ。期待は不変</span></div>
+      <div class="route"><b>Tに書かれていない</b><span class="to">→ 要件整理の欠陥。人間の再承認イベント</span></div>
+      <div class="route"><b>実現案・実装が乖離</b><span class="to">→ 差し戻しリトライ。Tは不変</span></div>
       <div class="route"><b>テストが未検出</b><span class="to">→ テスト観点の漏れ</span></div>
       <div class="route"><b>トリアージの誤判定</b><span class="to">→ 判定基準の改訂</span></div>
       <div class="route"><b>プロセスの誤り</b><span class="to">→ 資産改訂（宛先つきdiff提案）</span></div>
@@ -334,7 +335,7 @@
       <h2>資産（沈殿先）</h2>
       <div class="route"><b>evalセット</b><span class="to">永続資産の本体。実運用Issueが素材。SKILL.mdより長生きする仕様</span></div>
       <div class="route"><b>システムマップ</b><span class="to">索引であって本文ではない（場所・関係・鮮度のポインタ集。要約の転記禁止）。鮮度メタデータ必須：最終確認Issue＋日付、古い項目は「未確認」へ自動降格。更新3経路＝マージ時（正常系）／前提崩壊時（例外系）／網羅的調査時（探索系）。内容は事実のみ＝人間ゲート不要、スキーマ変更のみ資産diffとして承認</span></div>
-      <div class="route"><b>期待テンプレート／SKILL.md群</b><span class="to">世代ごとに書き直し可能な実装</span></div>
+      <div class="route"><b>assets（要件整理・要件確認の書式）／references/principles.md／SKILL.md群</b><span class="to">世代ごとに書き直す実装。試走の指摘はここへ還元する</span></div>
       <div class="route"><b>CLAUDE.md・コンテキスト文書</b><span class="to">コードから読めない恒久知識</span></div>
       <div class="route"><b>決定ログ</b><span class="to">仕分け結果・フェーズ別NG混入率・前提崩壊率の集計元</span></div>
     </div>
@@ -343,7 +344,8 @@
       <h2>コンテキスト最小化（実行時の規律）</h2>
       <p>コンテキストは渡さず、取りに行かせる。マップはその索引。</p>
       <div class="route"><b>フェーズ別入力契約</b><span class="to">各SKILL.md冒頭に「読んでよいもの」全列挙＋「読んではいけないもの」明記。例：突合役に実現案の判断理由を読ませない（採点が甘くなる）— 最小化は独立性の注入でもある</span></div>
-      <div class="route"><b>フェーズ間は成果物のみ</b><span class="to">会話履歴を持ち越さない。往復は期待文書と変更履歴に蒸留された時点で役目を終える</span></div>
+      <div class="route"><b>フェーズ間は成果物のみ</b><span class="to">会話履歴を持ち越さない。往復は要件整理の文書と変更履歴に蒸留された時点で役目を終える。CとTのIDが工程を跨ぐ唯一の参照</span></div>
+      <div class="route"><b>出力先は作業メモ</b><span class="to">repo・GitHubへの書き込みは明示指示があるときだけ。技術事実は囲みブロックを読んでから断定し、根拠行を要約で落とさない</span></div>
       <div class="route"><b>予算の計測</b><span class="to">フェーズ別トークン・読了ファイル数を試走から記録。契約外読込は契約かマップの欠陥としてメタループへ</span></div>
     </div>
 
@@ -365,97 +367,83 @@
 
 <div class="skilltable">
   <h2>スキルとモデル割当</h2>
-  <div class="principle">原則：曖昧さ・トレードオフの判断＝<b>Fable 5</b>／決まったことを決まった通りに＝<b>Opus 5</b>／機械的照合・翻訳＝<b>Sonnet 5</b>。evalは常に実際に使うモデルで実行。<span class="first-tag">初期実装</span>＝試走で最初に作る3点。残りは素のClaude Codeへの都度指示で代替し、痛みが観測されてからスキル化。</div>
+  <div class="principle">スキルの実行はすべて<b>Opus 5.5</b>（各SKILL.mdの<code>model:</code>で指定。Opus 5よりラリー回数が少なく、Fableと使用感に大差がなくコストが低い）。判定役＝evalの採点・verify-1からのエスカレーション先・ゲートで人間を補助する読み手は<b>Fable 5.1</b>。evalは常に実際に使うモデルで実行し、割当は運用パラメータとして更新する。スキル名の先頭はレイヤ（req / design / verify）とレイヤ内の順序。</div>
   <table>
     <tr><th>スキル</th><th>担当</th><th>モデル</th><th>割当理由</th></tr>
-    <tr class="first">
-      <td class="sk">clarify-expectation<span class="first-tag">初期実装</span></td>
-      <td>詳細化・質問ルーター・変更履歴・E2E可能語彙のプリフライト（＋当面decompose-issueを内包）</td>
-      <td><span class="chip fable">Fable 5</span></td>
-      <td class="why">曖昧さの検出がフロー全体の品質上限。「各行はE2Eで観測可能か」の検査を含む</td>
+    <tr>
+      <td class="sk">req-1-triage-issue</td>
+      <td>S/M/L判定・根拠一行・完了基準C1〜Cnの採番</td>
+      <td><span class="chip opus">Opus 5.5</span></td>
+      <td class="why">判定と採番だけ。原因の仮説を書かない規律が主</td>
     </tr>
     <tr>
-      <td class="sk">decompose-issue</td>
-      <td>最大分割・依存グラフ・統合期待。実行時モード（負債の切り出し）を含む</td>
-      <td><span class="chip fable">Fable 5</span></td>
-      <td class="why">「独立に検証可能な最小単位」の切り出しは設計判断。肥大したらclarifyから分離</td>
+      <td class="sk">req-2-survey-codebase</td>
+      <td>網羅的調査（L経路）・Cごとの3問表・前例・マトリクス消込・影響マップ・マップ更新</td>
+      <td><span class="chip opus">Opus 5.5</span></td>
+      <td class="why">網羅的探索の正確性勝負。領域別に並列サブエージェント→集約（根拠行を落とさない）</td>
     </tr>
     <tr>
-      <td class="sk">survey-codebase</td>
-      <td>網羅的調査（L経路）・マトリクス消込・マップ拡充</td>
-      <td><span class="chip opus">Opus 5</span></td>
-      <td class="why">網羅的探索の正確性勝負。領域別に並列サブエージェント→集約</td>
+      <td class="sk">req-3-clarify-expectation</td>
+      <td>業務背景・格子・受け入れ基準T表・質問ルーター・要件確認・分割・変更履歴・E2E語彙プリフライト</td>
+      <td><span class="chip opus">Opus 5.5</span></td>
+      <td class="why">曖昧さの検出がフロー全体の品質上限。初版から表で出す</td>
     </tr>
     <tr>
-      <td class="sk">investigate-codebase</td>
-      <td>単位ごとの現状調査・領域判定</td>
-      <td><span class="chip opus">Opus 5</span></td>
-      <td class="why">定型手順の正確な探索。判断より網羅</td>
-    </tr>
-    <tr>
-      <td class="sk">propose-with-diagram</td>
-      <td>実現案＋提示仕様準拠の図解（三層・⚠・却下案・形式固定）</td>
-      <td><span class="chip fable">Fable 5</span></td>
-      <td class="why">トレードオフの選択と違和感検出器の生成。レンダリングはスクリプトへ</td>
+      <td class="sk">design-1-propose-with-diagram</td>
+      <td>実現案（Tごとの目次表・機能単位・図は任意・根拠/却下案/⚠・実装メモ）</td>
+      <td><span class="chip opus">Opus 5.5</span></td>
+      <td class="why">候補2案以上の比較と違和感検出器の生成</td>
     </tr>
     <tr>
       <td class="sk">（実装）</td>
-      <td>自作スキルなし。既存の型＋前提崩壊申告プロトコル</td>
-      <td><span class="chip opus">Opus 5</span></td>
-      <td class="why">決まったことを決まった通りに。Fable不要（方針どおり）</td>
-    </tr>
-    <tr class="first">
-      <td class="sk">verify-traceability<span class="first-tag">初期実装</span></td>
-      <td>図解突合・期待→テスト対応表・エビデンス・マップdiff生成</td>
-      <td><span class="chip sonnet">Sonnet 5</span></td>
-      <td class="why">照合と翻訳。高頻度なのでコスト効率優先。迷う差分のみ上位へエスカレーション。人間の理解の入力の忠実性を担保する土台</td>
-    </tr>
-    <tr class="first">
-      <td class="sk">（期待テンプレート）<span class="first-tag">初期実装</span></td>
-      <td>Issueの「期待」（人間承認）／「コンテキスト」（承認不要）の2部構成＋非機能の定型欄</td>
-      <td>—</td>
-      <td class="why">スキルではなく.github/ISSUE_TEMPLATE。全工程の正解の定義</td>
+      <td>自作スキルなし。実装メモ（AI用）＋前提崩壊申告プロトコル</td>
+      <td><span class="chip opus">Opus 5.5</span></td>
+      <td class="why">決まったことを決まった通りに</td>
     </tr>
     <tr>
-      <td class="sk">attribute-defect</td>
+      <td class="sk">verify-1-traceability</td>
+      <td>T→テスト対応表・エビデンス・未カバー・エスカレーション</td>
+      <td><span class="chip opus">Opus 5.5</span></td>
+      <td class="why">照合のみ。迷う差分は判定役（Fable 5.1）か人間へ</td>
+    </tr>
+    <tr>
+      <td class="sk">（判定役）</td>
+      <td>evalの採点・エスカレーションの裁定・ゲートで人間を補助する読み手</td>
+      <td><span class="chip fable">Fable 5.1</span></td>
+      <td class="why">実行役と採点役を分け、自己採点の相関を切る</td>
+    </tr>
+    <tr>
+      <td class="sk">attribute-defect（未実装）</td>
       <td>NG調査・帰属・改訂diff提案</td>
-      <td><span class="chip fable">Fable 5</span></td>
-      <td class="why">因果推論と抽象化。低頻度・高価値</td>
+      <td><span class="chip fable">Fable 5.1</span></td>
+      <td class="why">因果推論と抽象化。低頻度・高価値。痛みを観測してから</td>
     </tr>
     <tr>
-      <td class="sk">distill-feedback</td>
-      <td>ゲート③指摘の資産diff化（当面は手動棚卸し）</td>
-      <td><span class="chip fable">Fable 5</span></td>
-      <td class="why">個別→一般則の昇華。育成→巡航遷移の心臓部</td>
-    </tr>
-    <tr>
-      <td class="sk">skill-gardener</td>
-      <td>モデル更新検知・eval再実行・ablation剪定</td>
-      <td><span class="chip fable">Fable 5</span></td>
-      <td class="why">剪定判断はFable、eval実行は移行先の各モデルで</td>
+      <td class="sk">distill-feedback / skill-gardener（未実装）</td>
+      <td>ゲート③指摘の資産diff化・モデル更新時のeval再実行とablation剪定</td>
+      <td><span class="chip fable">Fable 5.1</span></td>
+      <td class="why">個別→一般則の昇華と剪定判断。当面は手動棚卸し</td>
     </tr>
   </table>
 </div>
 
 <div class="rollout">
   <div class="box now">
-    <h3>初期実装（試走の装備）</h3>
+    <h3>今の状態</h3>
     <ul>
-      <li>期待テンプレート＋clarify-expectation＋verify-traceability の3点のみ</li>
-      <li>他フェーズは素のClaude Code＋本設計文書への都度指示で一周する</li>
-      <li>試走の観測項目：解明の往復回数／各ゲートの承認時間と読み味／前提崩壊の有無／QA NGの有無／フェーズ別コンテキスト消費 — これが最初のeval素材</li>
-      <li>独立レビューを1箇所：マージ前に期待文書と実装だけを渡した別コンテキストのレビュー（実現案・対応表を見せない）— 自己採点の相関を切る最安の手段</li>
+      <li>要件（req-1/2/3）→設計（design-1）→検証（verify-1）がスキルで通る。実装は素のClaude Code＋実装メモ</li>
+      <li>各工程の産物は表。CとTのIDが工程を跨ぐ参照。出力先は作業メモ、repo/GitHubへは明示指示時のみ</li>
+      <li>独立レビューを1箇所：マージ前に要件整理の文書と実装だけを渡した別コンテキストのレビュー（実現案・対応表を見せない）— 自己採点の相関を切る最安の手段</li>
     </ul>
   </div>
   <div class="box">
-    <h3>仮説リスト（設計に足さず、試走で検証する）</h3>
+    <h3>試走で観測すること（eval素材）</h3>
     <ul>
-      <li>Sの軽量経路の具体形（1コメント畳み込みの書式）</li>
-      <li>clarify / decompose の統合維持か分離か</li>
-      <li>⚠予算の適正数（3で足りるか）</li>
-      <li>マップの鮮度閾値（何日/何Issueで未確認へ降格するか)</li>
-      <li>コンテキスト契約の中身（実現案に変更履歴を見せるか等）</li>
-      <li>本番シグナル（障害・報告）のNG調査への還流 — QAすり抜け率が問題になってから</li>
+      <li>要件整理の往復回数（初版が格子と表で出たか）</li>
+      <li>各ゲートの承認時間と読み味（⚠外指摘率）</li>
+      <li>前提崩壊の有無・QA NGの有無</li>
+      <li>フェーズ別コンテキスト消費（契約外読込は契約かマップの欠陥）</li>
+      <li>⚠予算3の適正・マップの鮮度閾値・Sの軽量経路の書式</li>
     </ul>
   </div>
 </div>
