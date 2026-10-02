@@ -1,37 +1,36 @@
 # github-flow
 
-Claude Code 向けの **開発フロー設計** と、そこから起こすスキル群の置き場。
+Claude Code 向けの **開発フロー設計** と、そこから起こすスキル群。
 
 ## 目的
 
-「GitHub Issue を AI と一緒に解く」ときの工程・人間ゲート・資産化ループを設計し、
-その設計に沿った SKILL.md / テンプレートを実装していく。
-
-設計の方針は次の2点:
+「GitHub Issue を AI と一緒に解く」ときの工程・人間ゲート・資産化ループを設計し、その設計に沿った SKILL.md / 書式を実装する。
 
 - 開発者の労力を通時的に最小化し、品質を最大化する。承認は労力ではなく **理解** を生産する投資
-- 人間が理解するのは **期待の正しさ / 判断の方向 / 翻訳の一致** の3点だけ。実装の正しさは E2E の観測と指標(前提崩壊率など)が担保する
+- 人間が理解するのは **要件の正しさ / 判断の方向 / 翻訳の一致** の3点だけ。実装の正しさは E2E の観測と指標(前提崩壊率など)が担保する
+- 人間は散文を読まない。承認の対象は表と格子で出す
 
-## 中身
+## 実行順とスキル
 
-Claude Code のプラグイン(`.claude-plugin/plugin.json`)。`yannsugi/claude-skills` マーケットプレイスの `plugins/github-flow/` に置かれている。
+スキル名の先頭はレイヤ(req=要件 / design=設計 / verify=検証)とレイヤ内の順序。辞書順は実行順と一致しないので、順序はこの表で見る。
+
+| 順 | スキル | 内容 | 産物 |
+|---|---|---|---|
+| 1 | `req-1-triage-issue` | S/M/L 判定・根拠一行・完了基準 C1〜Cn の採番 | トリアージブロック |
+| 2 | `req-2-survey-codebase`(L のみ) | 領域×観点マトリクスの全セル消込。C ごとの「既存で満たせるか/新規の仕組み/repo 外依存」の表、前例、影響マップ、system-map | 網羅的調査 |
+| 3 | `req-3-clarify-expectation` | 業務背景・状態×操作の格子・受け入れ基準の表(T)・要件確認・分割・変更履歴。出力書式は `assets/expectation.md`、要件確認は `assets/questions.md` | 実装前の要件・受け入れ基準の整理 → 承認 |
+| 4 | `design-1-propose-with-diagram` | T ごとの対応可否の目次表・変更がある機能単位の節・図(任意)・根拠/却下案/⚠・実装メモ(AI 用) | 実現案 → 承認 |
+| — | (実装) | 自作スキルなし。実装メモに沿って実装し、前提が崩れたら申告して止まる | PR |
+| 5 | `verify-1-traceability` | T→テスト対応表・エビデンス・未カバー・エスカレーション | 照合結果 → 承認 |
+
+C と T の ID が工程を跨ぐ唯一の参照で、途中で振り直さない。
 
 | path | 内容 |
-|------|------|
-| `github_issue_flow_v3.html` | GitHub Issue 解決フロー v3(凍結版・北極星)。トリアージ→解明→実現案→実装→品質担保→マージの定常フロー、3つの人間ゲート、例外フロー(NG調査)、資産(eval セット / システムマップ)、コンテキスト最小化規律、世代交代ループ、スキルとモデル割当(Fable / Opus / Sonnet)を1枚にまとめた図解 |
-| `DESIGN.md` | 上記図解の文章版(思想文書)。スキルはここを参照する。核・3ゲート・各フェーズの規律・通底原則・初期実装3点と仮説リスト |
-| `skills/triage-issue/` | トリアージ(Fable 5)。S/M/L 判定と根拠一行のみ。L なら survey-codebase へ |
-| `skills/survey-codebase/` | 網羅的調査(Opus 5・L のみ)。領域×観点マトリクスの全セル消込、影響マップ、未確認セルの⚠候補化、`docs/system-map.md` の更新 |
-| `skills/clarify-expectation/` | 解明フェーズ(Fable 5)。質問ルーター・E2E 語彙プリフライト・変更履歴。出力書式は同梱の `assets/expectation.md`(期待/コンテキストの2部構成)。既存 Issue の本文をこの形に書き直す |
-| `skills/propose-with-diagram/` | 実現案(Fable 5)。変更タイプ別の Mermaid 図(L1)・根拠と却下案と⚠(L2)・実装計画(L3)の三層。期待→手段の対応表。ゲート②の入力 |
-| `skills/verify-traceability/` | 品質担保の照合役(Sonnet 5)。期待→テスト対応表・未カバー・エスカレーション。`gh pr comment` で出力 |
-| `docs/` | 実装ごとの設計メモ |
-
-`github_issue_flow_v3.html` はブラウザで直接開いて読む(ビルド不要)。GitHub 上からは [図解を開く](https://yannsugi.github.io/claude-skills/plugins/github-flow/github_issue_flow_v3.html)(GitHub Pages。root を公開元にした場合の URL)。
-
-```bash
-open github_issue_flow_v3.html
-```
+|---|---|
+| `DESIGN.md` | 設計思想。スキルはここを参照する。今のフローを良くする形に常に更新する |
+| `github_issue_flow.html` | DESIGN.md の図解版。[ブラウザで開く](https://yannsugi.github.io/claude-skills/plugins/github-flow/github_issue_flow.html) |
+| `references/principles.md` | 全スキル共通の原則(出力先・書式・技術事実の断定・C/T・分割の条件) |
+| `skills/<name>/SKILL.md` | 各スキル。`model:` で実行モデルを指定(全て Opus 5.5。判定役は Fable 5.1) |
 
 ## 使い方
 
@@ -47,20 +46,10 @@ SKILL.md 内の `${CLAUDE_PLUGIN_ROOT}` はこのディレクトリを指す。�
 
 Issue 番号ではなくローカル Markdown を対象にした試走もできる(各 SKILL.md 末尾の試走モード参照)。
 
-GitHub への書き込み(`gh issue comment` / `gh issue edit` / `gh pr comment` / ラベル付け)は、どのスキルも利用者が明示的に指示した場合にのみ行う。指示が無ければ文面を提示して止まる。読み取り(`gh issue view` 等)は自由。
+成果物の出力先は作業用のメモ置き場。repo への書き込み(system-map・コミット)と GitHub への書き込み(`gh issue comment` / `gh issue edit` / `gh pr comment` / ラベル付け)は、どのスキルも利用者が明示的に指示した場合にのみ行う。読み取り(`gh issue view` 等)は自由。
 
-## 現状と次の一手
+## 更新のしかた
 
-**設計は凍結済み。トリアージ→網羅的調査→解明→実現案→品質担保の照合まで(triage-issue / survey-codebase / clarify-expectation / propose-with-diagram / verify-traceability)が試走可能な状態。** 実装フェーズは自作スキルなし(設計どおり)。図解突合・マップ diff・NG 調査・distill-feedback・skill-gardener は未実装で、痛みを観測してから。 以後の改善は本設計への追加ではなく、
-試走で検証する **仮説** として扱う(仮説リストは図解末尾)。
+試走で見つかった改善点は Issue にまとめ、スキル本体・assets・principles・DESIGN.md・図解を同じ PR で直す。経緯の記録は git に任せ、文書には今の状態だけを書く。
 
-試走の初期実装は次の3点のみ(実装済み):
-
-1. 期待の書式(`clarify-expectation/assets/expectation.md` — 全工程の正解の定義。既存 Issue を書き直す出力書式)
-2. `clarify-expectation`(詳細化・質問ルーター・変更履歴・E2E可能語彙のプリフライト)
-3. `verify-traceability`(図解突合・期待→テスト対応表・エビデンス・マップ diff 生成)
-
-他フェーズは素の Claude Code + 設計文書への都度指示で一周し、**痛みが観測されてから**スキル化する。
-
-試走の観測項目 = 最初の eval 素材: 解明の往復回数 / 各ゲートの承認時間と読み味 /
-前提崩壊の有無 / QA NG の有無 / フェーズ別コンテキスト消費。
+未実装: NG 調査・distill-feedback・skill-gardener・図解突合・map diff。痛みを観測してから作る。

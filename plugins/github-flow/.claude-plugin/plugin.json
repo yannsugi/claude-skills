@@ -1,7 +1,7 @@
 {
   "name": "github-flow",
-  "version": "0.2.0",
-  "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)。triage-issue / survey-codebase / clarify-expectation / propose-with-diagram / verify-traceability。既存 Issue を対象にする",
+  "version": "0.3.0",
+  "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)。req-1-triage-issue / req-2-survey-codebase / req-3-clarify-expectation / design-1-propose-with-diagram / verify-1-traceability。既存 Issue を対象にする",
   "author": {
     "name": "yannsugi"
   },

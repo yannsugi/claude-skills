@@ -10,8 +10,8 @@
     {
       "name": "github-flow",
       "source": "./plugins/github-flow",
-      "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)。トリアージ→網羅的調査→解明→実現案のスキルと、品質担保の照合スキル",
-      "version": "0.2.0"
+      "description": "GitHub Issue を AI と解くフロー(DESIGN.md 準拠)。要件(トリアージ→網羅的調査→要件整理)→設計(実現案)→検証(照合)のスキル群",
+      "version": "0.3.0"
     }
   ]
 }
